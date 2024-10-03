@@ -54,6 +54,7 @@ def upload_files():
             res_data[isin]['reviews'] += 1
             pros = row['pros']
             cons = row['cons']
+            # content = row['content']
 
             for key, value in standards.items():
                 if substr_check(pros, value[0]):
@@ -64,7 +65,10 @@ def upload_files():
                     res_data[isin][key] -= 1
                 if substr_check(cons, value[1]):
                     res_data[isin][key] -= 1
-
+                # if substr_check(content, value[0]):
+                #     res_data[isin][key] += 1
+                # if substr_check(content, value[1]):
+                #     res_data[isin][key] -= 1
         dim_data = {}
         for key, value in standards.items():
             dim_data[key] = 0
@@ -122,5 +126,60 @@ def getValue():
     chartData['values2'] =values2
 
     return jsonify({'tableData': tableData, "chartData": chartData})
+
+@app.route("/dashboard", methods=['GET'])
+def dashboard():
+    with open('dashboard/call_data.json', 'r') as file:
+        call_data = json.load(file)
+    call_isin_list = list(call_data.keys())
+
+    with open('dashboard/glassdoor_data.json', 'r') as file:
+        glassdoor_data = json.load(file)
+    glassdoor_isin_list = list(glassdoor_data.keys())
+
+    isin_list = []
+
+    for call_isin in call_isin_list:
+        if call_isin in glassdoor_isin_list:
+            isin_list.append(call_isin)
+
+    return render_template('dashboard.html', isin_list = isin_list)
+
+@app.route('/getdashboardValue', methods=['POST'])
+def getdashboardValue():
+    isin_num = request.get_json().get("ISIN")
+
+    with open('dashboard/call_data.json', 'r') as file:
+        call_data = json.load(file)
+
+    with open('dashboard/call_dim.json', 'r') as file:
+        call_dim = json.load(file)
+
+    with open('dashboard/glassdoor_data.json', 'r') as file:
+        glassdoor_data = json.load(file)
+
+    with open('dashboard/glassdoor_dim.json', 'r') as file:
+        glassdoor_dim = json.load(file)
+
+    tableData = []
+    for key, value in call_dim.items():
+        tableData.append({"dim": key, "val": call_data[isin_num][key] - call_dim[key]/len(call_data), "avg": glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data)})
+
+    chartData = {}
+    keys_view = call_dim.keys()
+    labels = list(keys_view)
+
+    values1 = []
+    values2 = []
+    for key, value in call_dim.items():
+        values1.append(call_data[isin_num][key] - call_dim[key]/len(call_data))
+        values2.append(glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data))
+    
+    chartData['labels'] = labels
+    chartData['values1'] = values1
+    chartData['values2'] =values2
+
+    return jsonify({'tableData': tableData, "chartData": chartData})
+
 if __name__ == '__main__':
     app.run(debug=True)

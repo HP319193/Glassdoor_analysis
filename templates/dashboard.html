@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1800px;
+            /* Increased from 1200px */
+            width: 95%;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a4a4a;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            appearance: none;
+            background: url('data:image/svg+xml;utf8,<svg fill="%23333" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') no-repeat;
+            background-position: right 15px top 50%;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+        }
+
+        .dashboard {
+            display: flex;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        #tablePanel {
+            flex: 1;
+            max-width: 25%;
+            /* Decreased from 30% */
+            overflow-x: auto;
+        }
+
+        #graphPanel {
+            flex: 3;
+            /* Increased from 2 */
+            height: 500px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #4a4a4a;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-point {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+
+            #tablePanel,
+            #graphPanel {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Dynamic Dashboard</h1>
+        <select id="dataSelector" aria-label="Select data set">
+            {% for isin_val in isin_list %}
+            <option value="{{isin_val}}">{{isin_val}}</option>
+            {% endfor %}
+        </select>
+        <div class="dashboard">
+            <div class="panel" id="tablePanel">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Dim</th>
+                            <th>Call</th>
+                            <th>Review</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Table content will be dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel" id="graphPanel">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const datasets = {
+            dataset1: {
+                tableData: [
+                    { category: 'Jan', value1: 1500000, value2: 1200000 },
+                    { category: 'Feb', value1: 1800000, value2: 1500000 },
+                    { category: 'Mar', value1: 2200000, value2: 1900000 },
+                    { category: 'Apr', value1: 2000000, value2: 1700000 },
+                    { category: 'May', value1: 2400000, value2: 2100000 },
+                    { category: 'Jun', value1: 2800000, value2: 2500000 },
+                    { category: 'Jul', value1: 3000000, value2: 2700000 },
+                    { category: 'Aug', value1: 2900000, value2: 2600000 },
+                    { category: 'Sep', value1: 2700000, value2: 2400000 },
+                    { category: 'Oct', value1: 2500000, value2: 2200000 }
+                ],
+                chartData: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+                    values1: [1500000, 1800000, 2200000, 2000000, 2400000, 2800000, 3000000, 2900000, 2700000, 2500000],
+                    values2: [1200000, 1500000, 1900000, 1700000, 2100000, 2500000, 2700000, 2600000, 2400000, 2200000]
+                }
+            },
+            dataset2: {
+                tableData: [
+                    { category: 'Electronics', value1: 3000000, value2: 2700000 },
+                    { category: 'Clothing', value1: 1500000, value2: 1300000 },
+                    { category: 'Home & Garden', value1: 2000000, value2: 1800000 },
+                    { category: 'Sports', value1: 1200000, value2: 1000000 },
+                    { category: 'Books', value1: 800000, value2: 700000 },
+                    { category: 'Toys', value1: 1000000, value2: 900000 },
+                    { category: 'Health', value1: 1800000, value2: 1600000 },
+                    { category: 'Automotive', value1: 2200000, value2: 2000000 },
+                    { category: 'Jewelry', value1: 1600000, value2: 1400000 },
+                    { category: 'Food', value1: 2500000, value2: 2300000 }
+                ],
+                chartData: {
+                    labels: ['Electronics', 'Clothing', 'Home & Garden', 'Sports', 'Books', 'Toys', 'Health', 'Automotive', 'Jewelry', 'Food'],
+                    values1: [3000000, 1500000, 2000000, 1200000, 800000, 1000000, 1800000, 2200000, 1600000, 2500000],
+                    values2: [2700000, 1300000, 1800000, 1000000, 700000, 900000, 1600000, 2000000, 1400000, 2300000]
+                }
+            },
+            dataset3: {
+                tableData: [
+                    { category: 'North', value1: 2500000, value2: 2300000 },
+                    { category: 'South', value1: 1800000, value2: 1600000 },
+                    { category: 'East', value1: 2200000, value2: 2000000 },
+                    { category: 'West', value1: 2700000, value2: 2500000 },
+                    { category: 'Central', value1: 2000000, value2: 1800000 },
+                    { category: 'Northeast', value1: 2300000, value2: 2100000 },
+                    { category: 'Southeast', value1: 1900000, value2: 1700000 },
+                    { category: 'Northwest', value1: 2100000, value2: 1900000 },
+                    { category: 'Southwest', value1: 2400000, value2: 2200000 },
+                    { category: 'Midwest', value1: 2600000, value2: 2400000 }
+                ],
+                chartData: {
+                    labels: ['North', 'South', 'East', 'West', 'Central', 'Northeast', 'Southeast', 'Northwest', 'Southwest', 'Midwest'],
+                    values1: [2500000, 1800000, 2200000, 2700000, 2000000, 2300000, 1900000, 2100000, 2400000, 2600000],
+                    values2: [2300000, 1600000, 2000000, 2500000, 1800000, 2100000, 1700000, 1900000, 2200000, 2400000]
+                }
+            }
+        };
+
+        const dataSelector = document.getElementById('dataSelector');
+        const dataTable = document.getElementById('dataTable');
+        const ctx = document.getElementById('myChart').getContext('2d');
+        let myChart;
+
+        function updateTable(data) {
+            const tbody = dataTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            data.forEach((item, index) => {
+                const row = tbody.insertRow();
+                row.className = 'data-point';
+                row.style.transitionDelay = `${index * 50}ms`;
+                row.insertCell(0).textContent = item.dim;
+                row.insertCell(1).textContent = item.val.toFixed(2);
+                row.insertCell(2).textContent = item.avg.toFixed(2);
+            });
+            anime({
+                targets: '.data-point',
+                opacity: 1,
+                translateY: 0,
+                delay: anime.stagger(50)
+            });
+        }
+
+        function updateChart(data) {
+            if (myChart) {
+                myChart.destroy();
+            }
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Call Transcript',
+                        data: data.values1,
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Glassdoor Reivew',
+                        data: data.values2,
+                        backgroundColor: 'rgba(237, 100, 166, 0.6)',
+                        borderColor: 'rgba(237, 100, 166, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    // return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact' }).format(value);
+                                    return value;
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            // const selectedDataset = datasets[dataSelector.value];
+            // updateTable(selectedDataset.tableData);
+            // updateChart(selectedDataset.chartData);
+            console.log(dataSelector.value);
+            $.ajax({
+                url: '/getdashboardValue',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ ISIN: dataSelector.value }),
+                success: function (response) {
+                    updateTable(response.tableData);
+                    updateChart(response.chartData);
+                },
+                error: function (xhr, status, error) {
+                    $('#response').text('Error: ' + error);
+                }
+            });
+        }
+
+        dataSelector.addEventListener('change', updateDashboard);
+
+        // Initial update
+        updateDashboard();
+    </script>
+</body>
+
+</html>
