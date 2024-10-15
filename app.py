@@ -2,13 +2,12 @@ from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import json
 import os
-import pandas as pd
 
 app = Flask(__name__)
 
 # Create a folder to store uploaded files if it doesn't exist
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# UPLOAD_FOLDER = 'uploads'
+# os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():

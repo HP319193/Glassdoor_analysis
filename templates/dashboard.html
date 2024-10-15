@@ -43,7 +43,7 @@
         select {
             width: 100%;
             padding: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             border-radius: 10px;
             border: 2px solid #ddd;
             font-size: 16px;
@@ -136,6 +136,10 @@
 <body>
     <div class="container">
         <h1>Dynamic Dashboard</h1>
+        <select id="methodSelector" aria-label="Select method">
+            <option value="1">Method 1</option>
+            <option value="2">Method 2</option>
+        </select>
         <select id="dataSelector" aria-label="Select data set">
             {% for isin_val in isin_list %}
             <option value="{{isin_val}}">{{isin_val}}</option>
