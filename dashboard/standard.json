@@ -1,0 +1,82 @@
+{
+    "Market Approach": [
+        [
+            "follower"
+        ],
+        [
+            "leader"
+        ]
+    ],
+    "Customers": [
+        [
+            "short-term"
+        ],
+        [
+            "long-term"
+        ]
+    ],
+    "Loyalty": [
+        [
+            "individual"
+        ],
+        [
+            "firm"
+        ]
+    ],
+    "Focus": [
+        [
+            "systems"
+        ],
+        [
+            "customers"
+        ]
+    ],
+    "Risk Tolerance": [
+        [
+            "risk"
+        ],
+        [
+            "ambition"
+        ]
+    ],
+    "Operational Approach": [
+        [
+            "consistent"
+        ],
+        [
+            "inconsistent"
+        ]
+    ],
+    "Decision Making": [
+        [
+            "centralised"
+        ],
+        [
+            "decentralised"
+        ]
+    ],
+    "Information": [
+        [
+            "data"
+        ],
+        [
+            "thoughtful"
+        ]
+    ],
+    "Atmosphere": [
+        [
+            "flexible"
+        ],
+        [
+            "formal"
+        ]
+    ],
+    "Results": [
+        [
+            "process"
+        ],
+        [
+            "results"
+        ]
+    ]
+}

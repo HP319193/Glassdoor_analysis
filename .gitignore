@@ -2,3 +2,6 @@ uploads/*
 result/*
 .vercel/*
 c.py
+models/*
+dashboard/reviews.csv
+dashboard/transcripts.csv
