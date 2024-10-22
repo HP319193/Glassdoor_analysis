@@ -228,6 +228,7 @@
         };
 
         const dataSelector = document.getElementById('dataSelector');
+        const methodSelector = document.getElementById('methodSelector');
         const dataTable = document.getElementById('dataTable');
         const ctx = document.getElementById('myChart').getContext('2d');
         let myChart;
@@ -324,7 +325,7 @@
                 url: '/getdashboardValue',
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ ISIN: dataSelector.value }),
+                data: JSON.stringify({ ISIN: dataSelector.value, method: methodSelector.value }),
                 success: function (response) {
                     updateTable(response.tableData);
                     updateChart(response.chartData);
@@ -336,6 +337,7 @@
         }
 
         dataSelector.addEventListener('change', updateDashboard);
+        methodSelector.addEventListener('change', updateDashboard);
 
         // Initial update
         updateDashboard();

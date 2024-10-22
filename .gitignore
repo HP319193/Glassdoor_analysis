@@ -5,3 +5,4 @@ c.py
 models/*
 dashboard/reviews.csv
 dashboard/transcripts.csv
+__pycache__/*

@@ -146,39 +146,77 @@ def dashboard():
 
 @app.route('/getdashboardValue', methods=['POST'])
 def getdashboardValue():
-    isin_num = request.get_json().get("ISIN")
-
-    with open('dashboard/call_data.json', 'r') as file:
-        call_data = json.load(file)
-
-    with open('dashboard/call_dim.json', 'r') as file:
-        call_dim = json.load(file)
-
-    with open('dashboard/glassdoor_data.json', 'r') as file:
-        glassdoor_data = json.load(file)
-
-    with open('dashboard/glassdoor_dim.json', 'r') as file:
-        glassdoor_dim = json.load(file)
-
-    tableData = []
-    for key, value in call_dim.items():
-        tableData.append({"dim": key, "val": call_data[isin_num][key] - call_dim[key]/len(call_data), "avg": glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data)})
-
-    chartData = {}
-    keys_view = call_dim.keys()
-    labels = list(keys_view)
-
-    values1 = []
-    values2 = []
-    for key, value in call_dim.items():
-        values1.append(call_data[isin_num][key] - call_dim[key]/len(call_data))
-        values2.append(glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data))
+    data = request.get_json()
+    isin_num = data.get("ISIN")
+    method = data.get("method")
     
-    chartData['labels'] = labels
-    chartData['values1'] = values1
-    chartData['values2'] =values2
+    print(method, type(method))
+    if method == "1":
+        print("here")
+        with open('dashboard/call_data.json', 'r') as file:
+            call_data = json.load(file)
 
-    return jsonify({'tableData': tableData, "chartData": chartData})
+        with open('dashboard/call_dim.json', 'r') as file:
+            call_dim = json.load(file)
+
+        with open('dashboard/glassdoor_data.json', 'r') as file:
+            glassdoor_data = json.load(file)
+
+        with open('dashboard/glassdoor_dim.json', 'r') as file:
+            glassdoor_dim = json.load(file)
+
+        tableData = []
+        for key, value in call_dim.items():
+            tableData.append({"dim": key, "val": call_data[isin_num][key] - call_dim[key]/len(call_data), "avg": glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data)})
+
+        chartData = {}
+        keys_view = call_dim.keys()
+        labels = list(keys_view)
+
+        values1 = []
+        values2 = []
+        for key, value in call_dim.items():
+            values1.append(call_data[isin_num][key] - call_dim[key]/len(call_data))
+            values2.append(glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data))
+        
+        chartData['labels'] = labels
+        chartData['values1'] = values1
+        chartData['values2'] =values2
+
+        return jsonify({'tableData': tableData, "chartData": chartData})
+    
+    if method == "2":
+        with open('dashboard/2_call_data.json', 'r') as file:
+            call_data = json.load(file)
+
+        with open('dashboard/2_call_dim.json', 'r') as file:
+            call_dim = json.load(file)
+
+        with open('dashboard/2_glassdoor_data.json', 'r') as file:
+            glassdoor_data = json.load(file)
+
+        with open('dashboard/2_glassdoor_dim.json', 'r') as file:
+            glassdoor_dim = json.load(file)
+
+        tableData = []
+        for key, value in call_dim.items():
+            tableData.append({"dim": key, "val": call_data[isin_num][key] - call_dim[key]/len(call_data), "avg": glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data)})
+
+        chartData = {}
+        keys_view = call_dim.keys()
+        labels = list(keys_view)
+
+        values1 = []
+        values2 = []
+        for key, value in call_dim.items():
+            values1.append(call_data[isin_num][key] - call_dim[key]/len(call_data))
+            values2.append(glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data))
+        
+        chartData['labels'] = labels
+        chartData['values1'] = values1
+        chartData['values2'] =values2
+
+        return jsonify({'tableData': tableData, "chartData": chartData})
 
 if __name__ == '__main__':
     app.run(debug=True)
