@@ -150,9 +150,7 @@ def getdashboardValue():
     isin_num = data.get("ISIN")
     method = data.get("method")
     
-    print(method, type(method))
     if method == "1":
-        print("here")
         with open('dashboard/call_data.json', 'r') as file:
             call_data = json.load(file)
 
@@ -197,10 +195,19 @@ def getdashboardValue():
 
         with open('dashboard/2_glassdoor_dim.json', 'r') as file:
             glassdoor_dim = json.load(file)
+        
+        sum_call_reviews = 0
+        sum_glassdoor_reviews = 0
+
+        for key, value in call_data.items():
+            sum_call_reviews = sum_call_reviews + value['reviews']
+
+        for key, value in glassdoor_data.items():
+            sum_glassdoor_reviews = sum_glassdoor_reviews + value['reviews']
 
         tableData = []
         for key, value in call_dim.items():
-            tableData.append({"dim": key, "val": call_data[isin_num][key] - call_dim[key]/len(call_data), "avg": glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data)})
+            tableData.append({"dim": key, "val": call_data[isin_num][key]/call_data[isin_num]['reviews'] - call_dim[key]/sum_call_reviews, "avg": 100 * (glassdoor_data[isin_num][key]/glassdoor_data[isin_num]['reviews'] - glassdoor_dim[key]/sum_glassdoor_reviews)})
 
         chartData = {}
         keys_view = call_dim.keys()
@@ -209,8 +216,8 @@ def getdashboardValue():
         values1 = []
         values2 = []
         for key, value in call_dim.items():
-            values1.append(call_data[isin_num][key] - call_dim[key]/len(call_data))
-            values2.append(glassdoor_data[isin_num][key] - glassdoor_dim[key]/len(glassdoor_data))
+            values1.append(call_data[isin_num][key]/call_data[isin_num]['reviews'] - call_dim[key]/sum_call_reviews)
+            values2.append(100 * (glassdoor_data[isin_num][key]/glassdoor_data[isin_num]['reviews'] - glassdoor_dim[key]/sum_glassdoor_reviews))
         
         chartData['labels'] = labels
         chartData['values1'] = values1
